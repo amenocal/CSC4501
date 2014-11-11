@@ -5,7 +5,7 @@ import random, datetime, time
 from socket import *
 
 #Server - iP address and Server Port
-serverName = '130.39.225.50'
+serverName = ''
 serverPort = 050116
 
 #create UDP Socket
