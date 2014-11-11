@@ -1,19 +1,26 @@
 #UDPingerClient.py
 #Alejandro Menocal - CSC 4501
+#imports
 import random, datetime, time
 from socket import *
 
+#Server - iP address and Server Port
 serverName = '130.39.225.50'
 serverPort = 050116
 
+#create UDP Socket
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 
-numPings = 10
+#number of Pings
+numPings = 10 
 
+#RTT List in order to calculate max, min and avg
 RTTList = []
 
+#counter to know how many requested time out
 counter = 0
 
+#Find the Avergae Function
 def avg(list):
 	sum = 0
 	for x in list:
@@ -21,6 +28,7 @@ def avg(list):
 
 	return str(sum/len(list)*1.0)
 
+#Find the Maximum Function
 def max(list):
 	max = list[0]
 	for x in list[1:]:
@@ -29,6 +37,7 @@ def max(list):
 
 	return str(max)
 
+#Find the Minimum Function
 def min(list):
 	min = list[0]
 	for x in list[1:]:
@@ -37,46 +46,51 @@ def min(list):
 
 	return str(min)
 
+#Find the Percentange
 def perc(num, whole):
-	return float(num)/float(whole) *100
+	return (float(num)/float(whole))*100
 
+#For loop, since starting at 1, I added 1 for it to send a total of 10 pings.
+for seq_num in range(1,numPings+1):
 
-for i in range(1,numPings):
-	#for loop
-	
+	#Time packet is being sent in Hours, Minutes and Seconds
 	senttime = time.strftime("%H:%M:%S", time.localtime())
 
-	#time = str(datetime.timedelta(seconds=senttime))
+	#message being sent
+	message = 'ping %d %s' % (seq_num, senttime)
 
-	message = 'ping %d %s capitalize this' % (i, senttime)
+	#Message to test to make sure it was capitalizing everything
+	#message = 'ping %d %s capitalize this' % (seq_num, senttime)
 
+	#Initial Time Packet is send; Used for RTT
 	intime = time.time()
 
+	#sendmessage to Server
 	clientSocket.sendto(message, (serverName, serverPort))
 
+	#Set timeout wait to 1 second
 	clientSocket.settimeout(1)
+
 	try:
-
-
+		#receive message
 		modifiedMessage, serverAddress = clientSocket.recvfrom(050116)
-
+		
+		#print the Modified Message
 		print modifiedMessage
 
+		#calculate RTT Time
 		RTT = (time.time() - intime)
 
-		#rtttime
 		print 'RTT: %s \n\n' % RTT
-		RTTList.insert(i, RTT)
-
-		#print 'List %s' % RTTList
+		#insert all the RTT into the List
+		RTTList.insert(seq_num, RTT)
 
 	except timeout:
 		print 'Request timed out \n\n'
 		counter += 1
 
 
-#close Client Socket
-#print 'Counter %d' % counter
 print 'Maximum RTT: %s, Minimum RTT: %s, Average RTT: %s' % (max(RTTList), min(RTTList), avg(RTTList))
-print 'Packet Loss Rate %d %%' % perc(counter, numPings)
+print 'PINGS sent: %d, Packet Loss Rate: %d%%' % (seq_num, perc(counter, numPings))
+
 clientSocket.close()
